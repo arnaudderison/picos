@@ -67,7 +67,7 @@ protected_mode_start:
     mov gs, ax
     mov esp, 0x90000
 
-    jmp 0x08:0x1000  ; saut vers ton kernel (CS = GDT[1], offset = 0x1000)
+    jmp 0x08:0x1000  ; saut vers THE kernel (CS = GDT[1], offset = 0x1000)
 
 disk_error:
     mov ah, 0x0E

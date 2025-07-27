@@ -65,7 +65,7 @@ protected_mode_start:
     mov gs, ax
     mov ss, ax
     mov esp, 0x90000  ; Initialisation de la stack
-    jmp 0x08:0x1000   ; Vers ton kernel
+    jmp 0x08:0x1000   ; Vers THE kernel
 
 disk_error:
     mov ah, 0x0E
