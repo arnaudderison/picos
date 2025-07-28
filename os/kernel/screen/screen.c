@@ -19,12 +19,31 @@ void clear_screen(Cursor* cursor) {
     }
 }
 
+static void handle_scroll(Cursor* cursor) {
+    int line;
+    int x;
+
+    if(cursor->y < ROWS)
+        return ;
+
+    for(line = 0; line < (ROWS - 1); line++) {
+        for(x = 0; x < COLS; x++) {
+            cursor->buffer[line * COLS + x] = cursor->buffer[(line + 1) * COLS + x];
+        }
+    }
+    line = ROWS - 1;
+    for(x = 0; x < COLS; x++) {
+        cursor->buffer[line * COLS + x] = (BLACK_ON_BLACK << 8) | ' ';
+    }
+    cursor->y = ROWS - 1;
+    if (cursor->x >= COLS)
+        cursor->x = 0;
+}
+
 void putchar(Cursor* cursor, const char c) {
     int index = 0;
 
-    // if(!isprint(c))
-    //     return ;
-
+    handle_scroll(cursor);
     if(c == '\n') {
         cursor->y++;
         cursor->x = 0;
@@ -36,10 +55,6 @@ void putchar(Cursor* cursor, const char c) {
             cursor->x = 0;
             cursor->y++;
         }
-    }
-    // il fadrait scroller plus tard
-    if (cursor->y >= ROWS) {
-        cursor->y = 0;
     }
 }
 
