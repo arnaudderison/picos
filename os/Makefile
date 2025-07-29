@@ -6,19 +6,19 @@ OBJCOPY = $(CROSS_PREFIX)objcopy
 
 BUILD_DIR = build
 
-# Trouver tous les fichiers source
-SRC_C    := $(shell find kernel -name "*.c")
-SRC_ASM  := $(shell find kernel -name "*.asm")
-SRC_S    := $(shell find kernel -name "*.S")
+# Fichiers sources
+SRC_C    := $(shell find kernel -name "*.c" | sort | uniq)
+SRC_ASM  := $(shell find kernel -name "*.asm" | sort | uniq)
+SRC_S    := $(shell find kernel -name "*.S" | sort | uniq)
 
-# Fichiers objets
+# Objets générés
 OBJ_C    := $(patsubst %.c, $(BUILD_DIR)/%.o, $(SRC_C))
 OBJ_ASM  := $(patsubst %.asm, $(BUILD_DIR)/%.o, $(SRC_ASM))
 OBJ_S    := $(patsubst %.S, $(BUILD_DIR)/%.o, $(SRC_S))
 
 DEPS := $(OBJ_C:.o=.d) $(OBJ_S:.o=.d)
 
-# Dossiers des headers
+# Include headers
 INCLUDE_DIRS := $(shell find kernel -type f -name "*.h" -exec dirname {} \; | sort -u)
 INCLUDE_FLAGS := $(addprefix -I, $(INCLUDE_DIRS))
 
@@ -27,27 +27,27 @@ LDFLAGS = -T linker.ld -nostdlib
 
 all: os.img
 
-# Bootloader
-boot.bin: boot.asm
-	nasm -f bin $< -o $@
-
 # Compilation .c
 $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Compilation .S (ASM avec cpp)
+# Compilation .S
 $(BUILD_DIR)/%.o: %.S
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Compilation .asm (NASM)
+# Compilation .asm
 $(BUILD_DIR)/%.o: %.asm
 	@mkdir -p $(dir $@)
 	nasm -f elf32 $< -o $@
 
-# Link kernel
-kernel.bin: $(OBJ_C) $(OBJ_S) $(OBJ_ASM) linker.ld
+# Bootloader
+boot.bin: boot.asm
+	nasm -f bin $< -o $@
+
+# Lien du kernel
+kernel.bin: $(OBJ_ASM) $(OBJ_S) $(OBJ_C) linker.ld
 	$(LD) $(LDFLAGS) -o $@ $(OBJ_ASM) $(OBJ_S) $(OBJ_C)
 	$(OBJCOPY) -O binary $@ $@
 
@@ -59,6 +59,23 @@ os.img: boot.bin kernel.bin
 
 run: os.img
 	qemu-system-i386 -fda os.img -vga std
+
+print-src:
+	@echo "Fichiers sources C :"
+	@echo $(SRC_C) | tr ' ' '\n'
+	@echo "\nFichiers sources ASM :"
+	@echo $(SRC_ASM) | tr ' ' '\n'
+	@echo "\nFichiers sources .S :"
+	@echo $(SRC_S) | tr ' ' '\n'
+
+print-objs:
+	@echo "Fichiers objets C :"
+	@echo $(OBJ_C) | tr ' ' '\n'
+	@echo "\nFichiers objets ASM :"
+	@echo $(OBJ_ASM) | tr ' ' '\n'
+	@echo "\nFichiers objets .S :"
+	@echo $(OBJ_S) | tr ' ' '\n'
+
 
 clean:
 	rm -rf $(BUILD_DIR) *.bin *.img kernel.bin

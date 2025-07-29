@@ -14,4 +14,7 @@ SECTIONS {
   .bss : {
     *(.bss COMMON)
   }
+  rodata : {
+    *(.rodata*)
+    }
 }

@@ -7,9 +7,10 @@ typedef struct {
     unsigned short* buffer;
 } Cursor;
 
-void reset_cursor(Cursor* cursor);
-void clear_screen(Cursor* cursor);
-void putchar(Cursor* cursor, const char c);
-void print(Cursor* cursor, const char* str);
+
+void reset_cursor();
+void clear_screen();
+void putchar(const char c);
+void print(const char* str);
 
 #endif
