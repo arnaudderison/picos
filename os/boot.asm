@@ -11,7 +11,7 @@ start:
 
     ; Charger le kernel (3 secteurs à partir du secteur 2) à 0x4000
     mov ah, 0x02        ; Fonction "read sectors"
-    mov al, 4           ; 3 secteurs
+    mov al, 10           ; 3 secteurs
     mov ch, 0           ; Cylinder
     mov cl, 2           ; Secteur 2
     mov dh, 0           ; Head
